@@ -101,9 +101,35 @@ public class Sorting {
 
         return merged;
     }
-    
-    public static void quickSort(int[] array) {
-        
+
+    public static void quickSort(int[] array, int front, int rear) {
+        if (front >= rear) return;
+
+        int pivotPos = front + (int) ((rear - front + 1) * Math.random()); // Pivot strategy: Random
+        int pivot = array[pivotPos];
+        array[pivotPos] = array[rear]; // Swap pivot to rear
+        array[rear] = pivot;
+
+        int leftPointer = front;
+        int rightPointer = rear-1;
+        do {
+            while ((leftPointer < rear) && (array[leftPointer] <= pivot)) {
+                leftPointer++;
+            }
+            while ((rightPointer > front) && (array[rightPointer] > pivot)) {
+                rightPointer--;
+            }
+            if (leftPointer < rightPointer) {
+                int temp = array[leftPointer];
+                array[leftPointer] = array[rightPointer];
+                array[rightPointer] = temp;
+            }
+        } while (leftPointer < rightPointer);
+        array[rear] = array[leftPointer];
+        array[leftPointer] = pivot;
+
+        quickSort(array, front, leftPointer-1);
+        quickSort(array, leftPointer+1, rear);
     }
 
     public static void radixSort(int[] array) {
