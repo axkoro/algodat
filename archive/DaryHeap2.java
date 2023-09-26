@@ -91,7 +91,7 @@ public class DaryHeap<T extends Comparable<T>> {
 			elements.add(i, list.get(i));
 		}
 		if (elements.size() > 1) {
-			for (int i = (elements.size()-2)/d; i >= 0; i--) { // TODO Formel richtig für das letzte Nicht-Blatt?
+			for (int i = (elements.size()-2)/d; i >= 0; i--) {
 				siftDown(i);
 			}
 		}
@@ -109,6 +109,7 @@ public class DaryHeap<T extends Comparable<T>> {
 			T element = elements.get(i);
 			T parent = elements.get(parentPos);
 			if (element.compareTo(parent) < 0) swap(i, parentPos);
+			i = parentPos;
 		}
 	}
 
@@ -119,7 +120,7 @@ public class DaryHeap<T extends Comparable<T>> {
 	 *            das neu hinzuzufügende Element
 	 */
 	public void add(T element) {
-		elements.add(elements.size(), element);
+		elements.add(element);
 		siftUp(elements.size()-1);
 	}
 
@@ -130,37 +131,25 @@ public class DaryHeap<T extends Comparable<T>> {
 	 *            das Element, das mit Elementen im heapgeordneten Array verglichen werden soll
 	 * @return Elemente im heapgeordneten Array, die kleiner als das übergebene Element sind
 	 */
-	public List<T> smallerAs(T element) { // oh ... we're doing min-heaps not max-heaps
+	public List<T> smallerAs(T element) {
 		List<T> elementsSmaller = new ArrayList<>();
-		if (elements.size() <= 1) return elementsSmaller;
+		Queue<Integer> nodes = new LinkedList<Integer>();
 
-		int firstLeaf = (elements.size()-2)/d + 1;
-		int numLeaves = elements.size()-firstLeaf;
-		boolean[] leavesChecked = new boolean[numLeaves];
+		if (elements.isEmpty()) return elementsSmaller;
+		
+		if (elements.get(0).compareTo(element) < 0) nodes.add(0);
+		while (!nodes.isEmpty()) {
+			int node = nodes.remove();
+			elementsSmaller.add(elements.get(node));
 
-		for (int leaf = 0; leaf < numLeaves; leaf++) { // iterate through leaves
-			if (leavesChecked[leaf]) continue;
-
-			int node = firstLeaf + leaf;
-			do { // go up the tree
-				T newElement = elements.get(node);
-				if (newElement.compareTo(element) < 0) node = (node-1)/d; // set node to parent's index
-			} while (node >= 0 && leaf != node);
-
-			Queue<Integer> indexes = new LinkedList<Integer>();
-			indexes.add(node);
-
-			while (!indexes.isEmpty()) { // add subtree to elementsSmaller
-				node = indexes.remove();
-				if (node < elements.size()) {
-					elementsSmaller.add(elements.get(node));
-					if (node >= firstLeaf) leavesChecked[node-firstLeaf] = true;
-					else for (int k = 0; k < d; k++) indexes.add(node*d+k); // add children
-				}
-			System.out.println(node);
-			System.exit(1);
+			for (int i = 1; i <= d; i++) { // add children
+				int childIndex = node*d + i;
+				if (childIndex >= elements.size()) break;
+				T child = elements.get(childIndex);
+				if (child.compareTo(element) < 0) nodes.add(childIndex);
 			}
 		}
+
 		return elementsSmaller;
 	}
 
